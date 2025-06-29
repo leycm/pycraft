@@ -14,4 +14,3 @@ class BlockType(IntEnum):
 class Block:
     def __init__(self, block_type):
         self.type = block_type
-        # Add other properties like light level, etc. later 

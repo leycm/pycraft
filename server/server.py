@@ -3,6 +3,7 @@ import random
 import threading
 import time
 import struct
+import uuid
 
 from shared.packets import (
     Packet, PlayerMoveRequestPacket, PlaceBlockRequestPacket, BreakBlockRequestPacket, LoginRequestPacket,
@@ -17,7 +18,8 @@ from shared.constants import BlockType, CHUNK_WIDTH, CHUNK_DEPTH
 CLIENTS_LOCK = threading.Lock()
 
 def generate_uuid():
-    return f"player-{random.randint(100, 999)}"
+    """Generate a proper UUID for players."""
+    return str(uuid.uuid4())
 
 def generate_name():
     """Generates a random player name."""
@@ -156,9 +158,11 @@ class TCPHandler(socketserver.BaseRequestHandler):
             pos = packet.position
             yaw = packet.yaw
             pitch = packet.pitch
+            sneaking = getattr(packet, 'sneaking', False)
             self.player.position = pos
             self.player.yaw = yaw
             self.player.pitch = pitch
+            self.player.sneaking = sneaking
             feedback = FeedbackPlayerMovePacket(1, pos, packet_id=packet.packet_id)
             self.request.sendall(feedback.pack())
 

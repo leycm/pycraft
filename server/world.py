@@ -36,7 +36,6 @@ class World:
         """Generates a simple flat-world chunk."""
         chunk = Chunk(position=(chunk_x, chunk_z))
         
-        # Simple flat world generation
         surface_y = 64
         
         for x in range(CHUNK_WIDTH):

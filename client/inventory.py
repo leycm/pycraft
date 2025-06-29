@@ -12,7 +12,6 @@ class Inventory:
         self.hotbar[0] = BlockType.STONE
         self.hotbar[1] = BlockType.DIRT
         self.hotbar[2] = BlockType.GRASS
-        # Other slots remain AIR
 
     def next_slot(self):
         """Selects the next slot, wrapping around."""

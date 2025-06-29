@@ -6,10 +6,9 @@ class InputHandler:
         self.window_width = window_width
         self.window_height = window_height
         
-        # Center mouse and hide cursor
-        pygame.mouse.set_pos(window_width // 2, window_height // 2)
-        pygame.mouse.set_visible(False)
-        pygame.event.set_grab(True)
+        # Don't auto-grab mouse - wait for click
+        pygame.mouse.set_visible(True)
+        pygame.event.set_grab(False)
         
         # Movement state
         self.movement = {
@@ -23,7 +22,8 @@ class InputHandler:
         
         # Mouse state
         self.last_mouse = (window_width // 2, window_height // 2)
-        self.mouse_locked = True
+        self.mouse_locked = False  # Start unlocked
+        self.sneaking = False
 
     def handle_events(self, camera, inventory, on_break, on_place):
         """Process all input events and update camera and inventory."""
@@ -34,10 +34,16 @@ class InputHandler:
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     self.toggle_mouse_lock()
+                elif event.key == pygame.K_F5:
+                    camera.third_person = not camera.third_person
+                elif event.key == pygame.K_LCTRL:
+                    self.sneaking = True
                 else:
                     self._handle_keydown(event.key, inventory)
             
             elif event.type == pygame.KEYUP:
+                if event.key == pygame.K_LCTRL:
+                    self.sneaking = False
                 self._handle_keyup(event.key)
             
             elif event.type == pygame.MOUSEMOTION and self.mouse_locked:
@@ -51,6 +57,7 @@ class InputHandler:
 
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if not self.mouse_locked:
+                    # Only grab mouse if clicking and not locked
                     self.toggle_mouse_lock()
                 elif event.button == 1: # Left click
                     on_break()
@@ -59,7 +66,8 @@ class InputHandler:
 
             elif event.type == pygame.ACTIVEEVENT:
                 if hasattr(event, 'gain') and event.gain == 1 and not self.mouse_locked:
-                    self.toggle_mouse_lock()
+                    # Don't auto-grab mouse on focus
+                    pass
 
         # Update camera position based on movement state
         self._update_camera_position(camera)
@@ -133,4 +141,8 @@ class InputHandler:
         """Toggle mouse lock state."""
         self.mouse_locked = not self.mouse_locked
         pygame.event.set_grab(self.mouse_locked)
-        pygame.mouse.set_visible(not self.mouse_locked) 
+        pygame.mouse.set_visible(not self.mouse_locked)
+        
+        if self.mouse_locked:
+            # Center mouse when locking
+            pygame.mouse.set_pos(self.window_width // 2, self.window_height // 2) 
